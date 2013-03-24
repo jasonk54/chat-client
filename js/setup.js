@@ -13,6 +13,9 @@ $.ajaxPrefilter(function(settings, _, jqXHR) {
   jqXHR.setRequestHeader("X-Parse-REST-API-Key", "QC2F43aSAghM97XidJw8Qiy1NXlpL5LR45rhAVAf");
 });
 
+var encodeHTML = function(s) {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+};
 
 var Chat = {};
 var userNames = {};
@@ -29,7 +32,7 @@ Chat.displayMsg = function(){
           name = name.split(' ').join('_');
           $('#main').append('<div class="name '
            + name + '">' + name + ': '
-           + data.results[i].text
+           + encodeHTML(data.results[i].text)
            + '</div>');
           if(!userNames[name]) {
             userNames[name] = false;
