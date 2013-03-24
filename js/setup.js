@@ -13,27 +13,40 @@ $.ajaxPrefilter(function(settings, _, jqXHR) {
   jqXHR.setRequestHeader("X-Parse-REST-API-Key", "QC2F43aSAghM97XidJw8Qiy1NXlpL5LR45rhAVAf");
 });
 
+
+var Chat = {};
 var userNames = {};
-//fix how the message is displayed on the DOM
+
 //Get Message from Parse server
-var displayMsg = function(){
+Chat.displayMsg = function(){
   $.ajax('https://api.parse.com/1/classes/messages', {
     contentType: 'application/json',
     success: function(data){
+      $('#main').html('');
       for (var i = 0, l = data.results.length; i < l; i++) {
         var name = data.results[i].username;
-        $('#main').append('<div class="name '+ name + '">' + name + ': ' + data.results[i].text + '</div>');
-        if(!userNames[name]) {
-          userNames[name] = false;
+        if( name ){
+          name = name.split(' ').join('_');
+          $('#main').append('<div class="name '
+           + name + '">' + name + ': '
+           + data.results[i].text
+           + '</div>');
+          if(!userNames[name]) {
+            userNames[name] = false;
+          }
         }
       }
+      // for (key in userNames) {
+      //   if (userNames[key] === true) {
+      //     $('.' + userNames[key]).addClass('bold');
+      //   }
+      // }
     }
   });
 };
 
 // var user = data.results[i].username
-// 
-var sendMsg = function(name, message, roomname, hax){
+Chat.sendMsg = function(name, message, roomname, hax){
   var messageObject = {
     'username': name,
     'text': message
@@ -50,15 +63,19 @@ var sendMsg = function(name, message, roomname, hax){
 };
 
 $(document).ready(function(){
-  displayMsg();
+  Chat.displayMsg();
+  setInterval(function(){Chat.displayMsg();}, 10000);
   $('.submit').click(function(){
     var name = $('.nameText').val();
     var message = $('.message').val();
-    sendMsg(name, message);
-    displayMsg();
+    Chat.sendMsg(name, message);
+    Chat.displayMsg();
   });
-  $('.name').click(function(){
-    alert('yo');
+  $('.name').css('color:blue');
+  $('#main').on('click','.name',function(){
+    var className = $(this).attr('class').split(' ').slice(1);
+    userNames[className] = true;
+    console.log(className);
+    $('.' + className.toString()).addClass('bold');
   });
-
 });
