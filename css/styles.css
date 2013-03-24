@@ -14,7 +14,10 @@ body {
     border: solid #ddd;
     border-width: 1px 1px 1px 1px;
     overflow: scroll;
+    float: right;
 }
+
+input {}
 
 #main h1 {
     margin-top: 0;
@@ -45,7 +48,12 @@ body {
     font-weight: bold;
 }
 
-.friend {
-    background: black;
-    float: left;
+.chatRoom {
+    padding: 50px 60px;
+    width: 180px;
+    height: 400px;
+    border: solid #ddd;
+    border-width: 1px 1px 1px 1px;
+    background-color: white;
+    overflow: scroll;
 }

@@ -19,8 +19,38 @@ var encodeHTML = function(s) {
 
 var Chat = {};
 var userNames = {};
+Chat.chatRoom = false;
 
-//Get Message from Parse server
+Chat.displaySecondaryChat = function(chatRoomName){
+  if(Chat.chatRoomName === false){
+    return;
+  }
+  var room = 'https://api.parse.com/1/classes/' + Chat.chatRoomName;
+  $.ajax(room, {
+    contentType: 'application/json',
+    success: function(data){
+      $('.chatRoom').html('');
+      for (var i = 0, l = data.results.length; i < l; i++) {
+        var name = data.results[i].username;
+        if( !name ){
+          name = 'anonymous';
+        }
+        if( name && data.results[i].text){
+          name = name.split(' ').join('_');
+          $('.chatRoom').append('<div class="name '
+           + name + (userNames[name] === true ? ' bold' : '')
+           + '" data-username="' + name + '">' + name + ': '
+           + encodeHTML(data.results[i].text)
+           + '</div>');
+          if(!userNames[name]) {
+            userNames[name] = false;
+          }
+        }
+      }
+    }
+  });
+};
+//Get Message from Parse server - Main room
 Chat.displayMsg = function(){
   $.ajax('https://api.parse.com/1/classes/messages', {
     contentType: 'application/json',
@@ -28,7 +58,10 @@ Chat.displayMsg = function(){
       $('#main').html('');
       for (var i = 0, l = data.results.length; i < l; i++) {
         var name = data.results[i].username;
-        if( name ){
+        if( !name ){
+          name = 'anonymous';
+        }
+        if( name && data.results[i].text){
           name = name.split(' ').join('_');
           $('#main').append('<div class="name '
            + name + (userNames[name] === true ? ' bold' : '')
@@ -45,11 +78,14 @@ Chat.displayMsg = function(){
 };
 
 // var user = data.results[i].username
-Chat.sendMsg = function(name, message, roomname, hax){
+Chat.sendMsg = function(name, message, room, hax){
   var messageObject = {
     'username': name,
     'text': message
   }
+  if (room) {
+    messageObject.roomname = room;
+  };
   $.ajax ({
     url: "https://api.parse.com/1/classes/messages",
     type: "POST",
@@ -63,16 +99,25 @@ Chat.sendMsg = function(name, message, roomname, hax){
 
 $(document).ready(function(){
   Chat.displayMsg();
-  setInterval(function(){Chat.displayMsg();}, 10000);
-  $('.submit').click(function(){
+  setInterval(function(){
+    Chat.displayMsg();
+    Chat.displaySecondaryChat(Chat.chatRoom);
+  }, 10000);
+  $('.info').submit(function(e){
+    e.preventDefault();
     var name = $('.nameText').val();
     var message = $('.message').val();
-    Chat.sendMsg(name, message);
+    var roomname = $('.chatRoomName').val();
+
+    if (roomname) {
+      Chat.chatRoom = roomname;
+    }
+    Chat.sendMsg(name, message, roomname);
+    Chat.displaySecondaryChat(roomname);
     Chat.displayMsg();
   });
   $('.name').css('color:blue');
   $('#main').on('click','.name',function(){
-    // var className = $(this).attr('class').split(' ').slice(1);
     var className = $(this).data('username');
     userNames[className] = true;
     console.log(className, userNames);
