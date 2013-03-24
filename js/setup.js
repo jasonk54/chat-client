@@ -31,7 +31,8 @@ Chat.displayMsg = function(){
         if( name ){
           name = name.split(' ').join('_');
           $('#main').append('<div class="name '
-           + name + '">' + name + ': '
+           + name + (userNames[name] === true ? ' bold' : '')
+           + '" data-username="' + name + '">' + name + ': '
            + encodeHTML(data.results[i].text)
            + '</div>');
           if(!userNames[name]) {
@@ -39,11 +40,6 @@ Chat.displayMsg = function(){
           }
         }
       }
-      // for (key in userNames) {
-      //   if (userNames[key] === true) {
-      //     $('.' + userNames[key]).addClass('bold');
-      //   }
-      // }
     }
   });
 };
@@ -76,9 +72,10 @@ $(document).ready(function(){
   });
   $('.name').css('color:blue');
   $('#main').on('click','.name',function(){
-    var className = $(this).attr('class').split(' ').slice(1);
+    // var className = $(this).attr('class').split(' ').slice(1);
+    var className = $(this).data('username');
     userNames[className] = true;
-    console.log(className);
+    console.log(className, userNames);
     $('.' + className.toString()).addClass('bold');
   });
 });
