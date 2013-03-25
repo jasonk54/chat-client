@@ -22,7 +22,7 @@ var userNames = {};
 Chat.chatRoom = false;
 var globalRoom = 'https://api.parse.com/1/classes/messages';
 
-var ajaxDisplayRoom = function(address, className){
+var ajaxDisplayRoom = function(address, className) {
   $.ajax(address, {
     contentType: 'application/json',
     success: function(data){
@@ -34,11 +34,11 @@ var ajaxDisplayRoom = function(address, className){
         }
         if( name && data.results[i].text){
           name = name.split(' ').join('_');
-          $(className).append('<div class="name '
-           + name + (userNames[name] === true ? ' bold' : '')
-           + '" data-username="' + name + '">' + name + ': '
-           + encodeHTML(data.results[i].text)
-           + '</div>');
+          $(className).append('<div class="name ' +
+           name + (userNames[name] === true ? ' bold' : '') +
+           '" data-username="' + name + '">' + name + ': ' +
+           encodeHTML(data.results[i].text) +
+           '</div>');
           if(!userNames[name]) {
             userNames[name] = false;
           }
@@ -48,7 +48,6 @@ var ajaxDisplayRoom = function(address, className){
   });
 };
 Chat.displaySecondaryChat = function(){
-  console.log(Chat.chatRoom)
   if(Chat.chatRoom === false){
     return;
   }
@@ -58,15 +57,15 @@ Chat.displaySecondaryChat = function(){
 
 // var user = data.results[i].username
 Chat.sendMsg = function(name, message, room, hax){
-  var tempUrl = "https://api.parse.com/1/classes/messages";
+  var tempUrl = globalRoom;
   var messageObject = {
     'username': name,
     'text': message
-  }
-  if (room) {
+  };
+  if(room) {
     messageObject.roomname = room;
     tempUrl = "https://api.parse.com/1/classes/" + room;
-  };
+  }
   $.ajax ({
     url: tempUrl,
     type: "POST",
