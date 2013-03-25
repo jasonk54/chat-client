@@ -20,63 +20,41 @@ var encodeHTML = function(s) {
 var Chat = {};
 var userNames = {};
 Chat.chatRoom = false;
+var globalRoom = 'https://api.parse.com/1/classes/messages';
 
+var ajaxDisplayRoom = function(address, className){
+  $.ajax(address, {
+    contentType: 'application/json',
+    success: function(data){
+      $(className).html('');
+      for (var i = 0, l = data.results.length; i < l; i++) {
+        var name = data.results[i].username;
+        if( !name ){
+          name = 'anonymous';
+        }
+        if( name && data.results[i].text){
+          name = name.split(' ').join('_');
+          $(className).append('<div class="name '
+           + name + (userNames[name] === true ? ' bold' : '')
+           + '" data-username="' + name + '">' + name + ': '
+           + encodeHTML(data.results[i].text)
+           + '</div>');
+          if(!userNames[name]) {
+            userNames[name] = false;
+          }
+        }
+      }
+    }
+  });
+};
 Chat.displaySecondaryChat = function(){
   console.log(Chat.chatRoom)
   if(Chat.chatRoom === false){
     return;
   }
-  // var room = ;
-  $.ajax('https://api.parse.com/1/classes/' + Chat.chatRoom, {
-    contentType: 'application/json',
-    success: function(data){
-      $('.chatRoom').html('');
-      for (var i = 0, l = data.results.length; i < l; i++) {
-        var name = data.results[i].username;
-        if( !name ){
-          name = 'anonymous';
-        }
-        if( name && data.results[i].text){
-          name = name.split(' ').join('_');
-          $('.chatRoom').append('<div class="name '
-           + name + (userNames[name] === true ? ' bold' : '')
-           + '" data-username="' + name + '">' + name + ': '
-           + encodeHTML(data.results[i].text)
-           + '</div>');
-          if(!userNames[name]) {
-            userNames[name] = false;
-          }
-        }
-      }
-    }
-  });
+  ajaxDisplayRoom('https://api.parse.com/1/classes/' + Chat.chatRoom, '.chatRoom');
 };
-//Get Message from Parse server - Main room
-Chat.displayMsg = function(){
-  $.ajax('https://api.parse.com/1/classes/messages', {
-    contentType: 'application/json',
-    success: function(data){
-      $('#main').html('');
-      for (var i = 0, l = data.results.length; i < l; i++) {
-        var name = data.results[i].username;
-        if( !name ){
-          name = 'anonymous';
-        }
-        if( name && data.results[i].text){
-          name = name.split(' ').join('_');
-          $('#main').append('<div class="name '
-           + name + (userNames[name] === true ? ' bold' : '')
-           + '" data-username="' + name + '">' + name + ': '
-           + encodeHTML(data.results[i].text)
-           + '</div>');
-          if(!userNames[name]) {
-            userNames[name] = false;
-          }
-        }
-      }
-    }
-  });
-};
+
 
 // var user = data.results[i].username
 Chat.sendMsg = function(name, message, room, hax){
@@ -101,9 +79,9 @@ Chat.sendMsg = function(name, message, room, hax){
 };
 
 $(document).ready(function(){
-  Chat.displayMsg();
+  ajaxDisplayRoom(globalRoom, '#main');
   setInterval(function(){
-    Chat.displayMsg();
+    ajaxDisplayRoom(globalRoom, '#main');
     Chat.displaySecondaryChat();
   }, 10000);
   $('.info').submit(function(e){
@@ -117,7 +95,7 @@ $(document).ready(function(){
     }
     Chat.sendMsg(name, message, roomname);
     Chat.displaySecondaryChat();
-    Chat.displayMsg();
+    ajaxDisplayRoom(globalRoom, '#main');
   });
   $('.name').css('color:blue');
   $('#main').on('click','.name',function(){
